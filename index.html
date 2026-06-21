@@ -329,15 +329,20 @@
     showStatus('info', '⏳', 'Submitting your request…');
 
     try {
-      const res = await fetch('/.netlify/functions/vessel-request-background', {
+      const res = await fetch('https://formsubmit.co/ajax/angam.cowork@gmail.com', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vessel_id: identifier, send_to: email })
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: 'Vessel ' + identifier,
+          vessel_identifier: identifier,
+          send_to: email,
+          _template: 'basic'
+        })
       });
 
       if (res.ok) {
         showStatus('success', '✅',
-          'Report requested! Claude is looking up ' + identifierLabel + ' now — you\'ll receive an email at ' + email + ' in a few minutes.');
+          'Report requested! We\'re looking up ' + identifierLabel + ' now — you\'ll receive an email at ' + email + ' within a few minutes.');
         btn.textContent = 'Request Sent ✓';
         setTimeout(() => {
           btn.disabled = false;
