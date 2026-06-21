@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vessel Report Request</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: #eef2f7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    opacity: 0.55;
+  }
+
+  .wordmark svg { width: 28px; height: 28px; }
+
+  .wordmark span {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #1e3a5f;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,30,80,0.10);
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #002855 0%, #005b99 100%);
+    color: white;
+    padding: 32px 32px 28px;
+  }
+
+  .card-header .ship-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  }
+
+  .card-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .card-header p {
+    font-size: 13.5px;
+    opacity: 0.72;
+    line-height: 1.55;
+  }
+
+  .card-body { padding: 28px 32px 32px; }
+
+  .group-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7b8fa8;
+    margin-bottom: 12px;
+  }
+
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+  }
+
+  .or-divider::before, .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e8edf3;
+  }
+
+  .or-divider span {
+    font-size: 11px;
+    font-weight: 700;
+    color: #b0bcc9;
+    letter-spacing: 0.5px;
+  }
+
+  .field { margin-bottom: 4px; }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #3d5166;
+    margin-bottom: 5px;
+  }
+
+  label .tag {
+    font-weight: 400;
+    color: #b0bcc9;
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid #dce4ed;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1a2e44;
+    background: #f7f9fc;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder { color: #b0bcc9; }
+
+  input:focus {
+    border-color: #005b99;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,91,153,0.12);
+  }
+
+  input.has-value {
+    border-color: #2a9d5c;
+    background: #f4fdf8;
+  }
+
+  input.error { border-color: #e53e3e; background: #fff5f5; }
+
+  .field-error {
+    font-size: 11.5px;
+    color: #e53e3e;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .field-error.show { display: block; }
+
+  .section-divider {
+    border: none;
+    border-top: 1.5px solid #edf1f6;
+    margin: 20px 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #002855 0%, #005b99 100%);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.1px;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 8px;
+    position: relative;
+  }
+
+  .submit-btn:hover:not(:disabled) { opacity: 0.88; }
+  .submit-btn:active:not(:disabled) { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .status-box {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    line-height: 1.55;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .status-box.show { display: flex; }
+  .status-box.info { background: #eff7ff; border: 1.5px solid #bcd9f5; color: #1a4d82; }
+  .status-box.success { background: #f0fdf6; border: 1.5px solid #b2e6cc; color: #1a5c3a; }
+  .status-box.warning { background: #fffbea; border: 1.5px solid #f5d97a; color: #7a5c00; }
+  .status-box.error-box { background: #fff5f5; border: 1.5px solid #fbb; color: #9b1c1c; }
+
+  .status-icon { font-size: 18px; flex-shrink: 0; margin-top: -1px; }
+
+  .footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #a0aec0;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="wordmark">
+  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="32" rx="8" fill="#002855"/>
+    <path d="M6 22h20M8 22l2-8h12l2 8M13 14V9h6v5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 9V6" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <span>Vessel Intelligence</span>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="ship-icon">🚢</span>
+    <h1>Request a Vessel Report</h1>
+    <p>Enter a vessel identifier and your email address to receive a full PDF report covering ownership, classification, surveys, and PSC history.</p>
+  </div>
+
+  <div class="card-body">
+    <div class="group-label">Vessel — provide at least one</div>
+
+    <div class="field">
+      <label for="dnv">DNV Vessel ID <span class="tag">optional</span></label>
+      <input type="text" id="dnv" name="dnv" placeholder="e.g. 38545" autocomplete="off" inputmode="numeric">
+    </div>
+
+    <div class="or-divider"><span>OR</span></div>
+
+    <div class="field">
+      <label for="imo">IMO Number <span class="tag">optional</span></label>
+      <input type="text" id="imo" name="imo" placeholder="e.g. 9829930" autocomplete="off" inputmode="numeric">
+    </div>
+
+    <div class="or-divider"><span>OR</span></div>
+
+    <div class="field">
+      <label for="vname">Vessel Name <span class="tag">optional</span></label>
+      <input type="text" id="vname" name="vname" placeholder="e.g. OCEAN PIONEER" autocomplete="off">
+    </div>
+
+    <div id="id-error" class="field-error">Please enter at least one vessel identifier.</div>
+
+    <hr class="section-divider">
+
+    <div class="group-label">Delivery</div>
+
+    <div class="field">
+      <label for="email">Send Report To</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+      <div id="email-error" class="field-error">Please enter a valid email address.</div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">
+      Request Vessel Report →
+    </button>
+
+    <div class="status-box" id="status-box">
+      <span class="status-icon" id="status-icon"></span>
+      <span id="status-text"></span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Powered by Vessel Intelligence · Reports delivered within minutes</div>
+
+<script>
+  // Highlight inputs that have content
+  document.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      inp.classList.toggle('has-value', inp.value.trim().length > 0);
+    });
+  });
+
+  function showStatus(type, icon, text) {
+    const box = document.getElementById('status-box');
+    box.className = 'status-box show ' + type;
+    document.getElementById('status-icon').textContent = icon;
+    document.getElementById('status-text').textContent = text;
+  }
+
+  async function handleSubmit() {
+    const dnv   = document.getElementById('dnv').value.trim();
+    const imo   = document.getElementById('imo').value.trim();
+    const vname = document.getElementById('vname').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    // Clear errors
+    document.getElementById('id-error').classList.remove('show');
+    document.getElementById('email-error').classList.remove('show');
+    document.getElementById('status-box').className = 'status-box';
+    ['dnv','imo','vname','email'].forEach(id => {
+      document.getElementById(id).classList.remove('error');
+    });
+
+    let ok = true;
+    if (!dnv && !imo && !vname) {
+      document.getElementById('id-error').classList.add('show');
+      ok = false;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('email-error').classList.add('show');
+      document.getElementById('email').classList.add('error');
+      ok = false;
+    }
+    if (!ok) return;
+
+    // Build identifier (priority: DNV > IMO > Name)
+    let identifier = dnv || imo || vname;
+    let identifierLabel = dnv  ? 'DNV: ' + dnv :
+                          imo  ? 'IMO: ' + imo :
+                                 'Name: ' + vname;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    showStatus('info', '⏳', 'Submitting your request…');
+
+    try {
+      const res = await fetch('/.netlify/functions/vessel-request-background', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vessel_id: identifier, send_to: email })
+      });
+
+      if (res.ok) {
+        showStatus('success', '✅',
+          'Report requested! Claude is looking up ' + identifierLabel + ' now — you\'ll receive an email at ' + email + ' in a few minutes.');
+        btn.textContent = 'Request Sent ✓';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Request Another Report →';
+          ['dnv','imo','vname'].forEach(id => {
+            document.getElementById(id).value = '';
+            document.getElementById(id).classList.remove('has-value');
+          });
+        }, 8000);
+      } else {
+        throw new Error('Server error ' + res.status);
+      }
+    } catch (err) {
+      showStatus('error-box', '❌',
+        'Something went wrong: ' + (err.message || 'Please try again.'));
+      btn.disabled = false;
+      btn.textContent = 'Request Vessel Report →';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') handleSubmit();
+  });
+</script>
+</body>
+</html>
